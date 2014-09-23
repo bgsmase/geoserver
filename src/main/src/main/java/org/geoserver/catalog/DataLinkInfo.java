@@ -34,12 +34,12 @@ public interface DataLinkInfo extends Info {
     /**
      * @uml.property name="type"
      */
-    String getFormat();
+    String getType();
 
     /**
      * @uml.property name="type"
      */
-    void setFormat(String type);
+    void setType(String type);
 
     /**
      * @uml.property name="content"
