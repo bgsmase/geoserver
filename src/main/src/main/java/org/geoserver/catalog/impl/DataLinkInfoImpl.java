@@ -19,7 +19,7 @@ public class DataLinkInfoImpl implements DataLinkInfo {
 
     String about;
 
-    String format;
+    String type;
 
     String content;
     
@@ -30,7 +30,7 @@ public class DataLinkInfoImpl implements DataLinkInfo {
     public DataLinkInfoImpl(DataLinkInfoImpl other) {
         this.id = other.id;
         this.about = other.about;
-        this.format = other.format;
+        this.type = other.type;
         this.content = other.content;
     }
 
@@ -55,13 +55,13 @@ public class DataLinkInfoImpl implements DataLinkInfo {
     }
 
     @Override
-    public String getFormat() {
-        return format;
+    public String getType() {
+        return type;
     }
 
     @Override
-    public void setFormat(String format) {
-        this.format = format;
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override
@@ -116,7 +116,7 @@ public class DataLinkInfoImpl implements DataLinkInfo {
         int result = 1;
         result = PRIME * result + ((about == null) ? 0 : about.hashCode());
         result = PRIME * result + ((content == null) ? 0 : content.hashCode());
-        result = PRIME * result + ((format == null) ? 0 : format.hashCode());
+        result = PRIME * result + ((type == null) ? 0 : type.hashCode());
         return result;
     }
 
@@ -141,17 +141,17 @@ public class DataLinkInfoImpl implements DataLinkInfo {
                 return false;
         } else if (!content.equals(other.getContent()))
             return false;
-        if (format == null) {
-            if (other.getFormat() != null)
+        if (type == null) {
+            if (other.getType() != null)
                 return false;
-        } else if (!format.equals(other.getFormat()))
+        } else if (!type.equals(other.getType()))
             return false;
         return true;
     }
     
     @Override
     public String toString() {
-        return new StringBuilder(getClass().getSimpleName()).append("[format:").append(format).append(", content:").append(content)
+        return new StringBuilder(getClass().getSimpleName()).append("[type:").append(type).append(", content:").append(content)
                 .append(']').toString();
     }
     
