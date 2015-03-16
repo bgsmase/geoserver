@@ -13,6 +13,7 @@ import org.geoserver.data.test.SystemTestData;
 import org.geoserver.inspire.InspireMetadata;
 import org.geoserver.test.GeoServerSystemTestSupport;
 import org.geoserver.wcs.WCSInfo;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -32,6 +33,13 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
         WCSInfo wcs = getGeoServer().getService(WCSInfo.class);
         wcs.getMetadata().clear();
         getGeoServer().save(wcs);
+    }
+
+    @Test
+    public void testNoInspireElementWhenNoMetadata() throws Exception {
+        Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
+        final NodeList nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "ExtendedCapabilities");
+        assertTrue(nodeList.getLength() == 0);
     }
 
     @Test
