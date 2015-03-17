@@ -69,6 +69,7 @@ public class WCSExtendedCapabilitiesProvider extends
         // A bit different from WFS as WCS versions have different types
         String version = request.getAcceptVersions().getVersion().get(0);
 
+        if (!existRequiredMetadata(wcs)) return;
         // IGN : INSPIRE SCENARIO 1
         tx.start("ows:ExtendedCapabilities");
         tx.start("inspire_dls:ExtendedCapabilities");
@@ -136,6 +137,12 @@ public class WCSExtendedCapabilitiesProvider extends
         tx.end("inspire_dls:ExtendedCapabilities");
         tx.end("ows:ExtendedCapabilities");
 
+    }
+
+    private boolean existRequiredMetadata(WCSInfo wcs) {
+        if (wcs.getMetadata().isEmpty()) return false; 
+        UniqueResourceIdentifiers ids = (UniqueResourceIdentifiers)  wcs.getMetadata().get(SPATIAL_DATASET_IDENTIFIER_TYPE.key, UniqueResourceIdentifiers.class);
+        return ids != null && !ids.isEmpty();
     }
 
 }
