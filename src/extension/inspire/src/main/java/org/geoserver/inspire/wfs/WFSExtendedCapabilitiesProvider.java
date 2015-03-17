@@ -9,6 +9,9 @@ import static org.geoserver.inspire.InspireMetadata.LANGUAGE;
 import static org.geoserver.inspire.InspireMetadata.SERVICE_METADATA_TYPE;
 import static org.geoserver.inspire.InspireMetadata.SERVICE_METADATA_URL;
 import static org.geoserver.inspire.InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE;
+import static org.geoserver.inspire.InspireSchema.COMMON_NAMESPACE;
+import static org.geoserver.inspire.InspireSchema.DLS_NAMESPACE;
+
 
 import java.io.IOException;
 
@@ -24,13 +27,6 @@ import org.xml.sax.helpers.NamespaceSupport;
 public class WFSExtendedCapabilitiesProvider implements
         org.geoserver.wfs.WFSExtendedCapabilitiesProvider {
 
-    public static final String COMMON_NAMESPACE = "http://inspire.ec.europa.eu/schemas/common/1.0";
-
-    public static final String DLS_NAMESPACE = "http://inspire.ec.europa.eu/schemas/inspire_dls/1.0";
-
-    /**
-     * IGN : Do we still need to host this xsd ?
-     */
     public String[] getSchemaLocations(String schemaBaseURL) {
         return new String[] { COMMON_NAMESPACE,
                 "http://inspire.ec.europa.eu/schemas/common/1.0/common.xsd", DLS_NAMESPACE,

@@ -5,7 +5,7 @@
  */
 package org.geoserver.inspire.wfs;
 
-import static org.geoserver.inspire.wfs.WFSExtendedCapabilitiesProvider.DLS_NAMESPACE;
+import static org.geoserver.inspire.InspireSchema.DLS_NAMESPACE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;

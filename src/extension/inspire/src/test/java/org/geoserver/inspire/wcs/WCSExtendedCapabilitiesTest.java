@@ -5,7 +5,8 @@
  */
 package org.geoserver.inspire.wcs;
 
-import static org.geoserver.inspire.wfs.WFSExtendedCapabilitiesProvider.DLS_NAMESPACE;
+import static org.geoserver.inspire.InspireSchema.COMMON_NAMESPACE;
+import static org.geoserver.inspire.InspireSchema.DLS_NAMESPACE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -42,7 +43,7 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
     @Test
     public void testNoInspireElementWhenNoMetadata() throws Exception {
         final Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
-        
+
         final NodeList nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "ExtendedCapabilities");
         assertTrue(nodeList.getLength() == 0);
     }
@@ -71,39 +72,62 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
 
         final Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
 
-        final NodeList nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "ExtendedCapabilities");
+        NodeList nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "ExtendedCapabilities");
         assertEquals("Existence of ExtendedCapabilities element", 1, nodeList.getLength());
-        /*
-         final Element extendedCaps = (Element) nodeList.item(0);
+
+        final Element extendedCapabilities = (Element) nodeList.item(0);
+
+        nodeList = extendedCapabilities.getElementsByTagNameNS(COMMON_NAMESPACE, "MetadataUrl");
+        assertEquals("Existence of MetadataURL element", 1, nodeList.getLength());
+
+        final Element metadataUrl = (Element) nodeList.item(0);
+
+        nodeList = metadataUrl.getElementsByTagNameNS(COMMON_NAMESPACE, "URL");
+        assertEquals("Existence of URL element", 1, nodeList.getLength());
+
+        final Element url = (Element) nodeList.item(0);
         
-         final Element mdUrl = getFirstElementByTagName(extendedCaps, "inspire_common:MetadataUrl");
-         assertNotNull(mdUrl);
+        assertEquals("http://foo.com?bar=baz", url.getFirstChild().getNodeValue());
 
-         final Element url = getFirstElementByTagName(mdUrl, "inspire_common:URL");
-         assertNotNull(url);
-         assertEquals("http://foo.com?bar=baz", url.getFirstChild().getNodeValue());
+        nodeList = extendedCapabilities.getElementsByTagNameNS(COMMON_NAMESPACE, "SupportedLanguages");
+        assertEquals("Existence of SupportedLanguages element", 1, nodeList.getLength());
 
-         final Element suppLangs = getFirstElementByTagName(extendedCaps,
-         "inspire_common:SupportedLanguages");
-         assertNotNull(suppLangs);
-         final Element defLang = getFirstElementByTagName(suppLangs,
-         "inspire_common:DefaultLanguage");
-         assertNotNull(defLang);
-         final Element defLangVal = getFirstElementByTagName(defLang, "inspire_common:Language");
-         assertEquals("fre", defLangVal.getFirstChild().getNodeValue());
+        final Element supportedLanguages = (Element) nodeList.item(0);
+        
+        nodeList = supportedLanguages.getElementsByTagNameNS(COMMON_NAMESPACE, "DefaultLanguage");
+        assertEquals("Existence of DefaultLanguage element", 1, nodeList.getLength());
+        
+        final Element defaultLanguage = (Element) nodeList.item(0);
 
-         final Element respLang = getFirstElementByTagName(extendedCaps,
-         "inspire_common:ResponseLanguage");
-         assertNotNull(respLang);
-         final Element respLangVal = getFirstElementByTagName(defLang, "inspire_common:Language");
-         assertEquals("fre", respLangVal.getFirstChild().getNodeValue());
+        nodeList = defaultLanguage.getElementsByTagNameNS(COMMON_NAMESPACE, "Language");
+        assertEquals("Existence of Language element", 1, nodeList.getLength());
+        
+        final Element dlLanguage = (Element) nodeList.item(0);
+        
+        assertEquals("fre", dlLanguage.getFirstChild().getNodeValue());
 
-         final Element sdi = getFirstElementByTagName(extendedCaps, "inspire_dls:SpatialDataSetIdentifier");
-         final Element code = getFirstElementByTagName(sdi, "inspire_common:Code");
-         assertEquals("one", code.getFirstChild().getNodeValue());
-         final Element ns = getFirstElementByTagName(sdi, "inspire_common:Namespace");
-         assertEquals("http://www.geoserver.org/inspire/one", ns.getFirstChild().getNodeValue());
-         */
+        // It is not necessary to repeat the DefaultLanguage as a SupportedLanguage
+        // so won't test SupportedLanguage although implementation does repeat
+        // it at time of writing 2015-03-17.
+        
+        nodeList = extendedCapabilities.getElementsByTagNameNS(COMMON_NAMESPACE, "ResponseLanguage");
+        assertEquals("Existence of ResponseLanguage element", 1, nodeList.getLength());
+        
+        final Element responseLanguage = (Element) nodeList.item(0);
+
+        nodeList = responseLanguage.getElementsByTagNameNS(COMMON_NAMESPACE, "Language");
+        assertEquals("Existence of Language element", 1, nodeList.getLength());
+        
+        final Element rlLanguage = (Element) nodeList.item(0);
+        
+        assertEquals("fre", rlLanguage.getFirstChild().getNodeValue());
+
+        final Element sdi = getFirstElementByTagName(extendedCapabilities, "inspire_dls:SpatialDataSetIdentifier");
+        final Element code = getFirstElementByTagName(sdi, "inspire_common:Code");
+        assertEquals("one", code.getFirstChild().getNodeValue());
+        final Element ns = getFirstElementByTagName(sdi, "inspire_common:Namespace");
+        assertEquals("http://www.geoserver.org/inspire/one", ns.getFirstChild().getNodeValue());
+
     }
 
     @Test
