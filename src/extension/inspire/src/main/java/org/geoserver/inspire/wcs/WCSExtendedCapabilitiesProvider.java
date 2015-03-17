@@ -102,12 +102,7 @@ public class WCSExtendedCapabilitiesProvider extends
         tx.chars(language);
         tx.end("inspire_common:Language");
         tx.end("inspire_common:DefaultLanguage");
-        // TODO when more than one language
-        // tx.start("inspire_common:SupportedLanguage");
-        // tx.start("inspire_common:Language");
-        // tx.chars(language);
-        // tx.end("inspire_common:Language");
-        // tx.end("inspire_common:SupportedLanguage");
+
         tx.end("inspire_common:SupportedLanguages");
 
         // ResponseLanguage
