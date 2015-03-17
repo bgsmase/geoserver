@@ -13,6 +13,9 @@
   <bean id="inspireWfsExtendedCapsProvider" class="org.geoserver.inspire.wfs.WFSExtendedCapabilitiesProvider">
   </bean>
   
+  <bean id="inspireWcsExtendedCapsProvider" class="org.geoserver.inspire.wcs.WCSExtendedCapabilitiesProvider">
+  </bean>
+  
   <bean id="inspireInitializer" class="org.geoserver.inspire.InspireInitializer">
     <description>GeoServerInitializer implementation to make sure inspire resources are available. For example, the
       schemas are copied to a publicly accessible location inside the data directory, etc.</description>
