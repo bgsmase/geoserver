@@ -5,22 +5,26 @@
  */
 package org.geoserver.inspire.wcs;
 
-import static org.geoserver.inspire.InspireSchema.COMMON_NAMESPACE;
-import static org.geoserver.inspire.InspireSchema.DLS_NAMESPACE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
-import org.geoserver.data.test.SystemTestData;
-import org.geoserver.inspire.InspireMetadata;
-import org.geoserver.test.GeoServerSystemTestSupport;
-import org.geoserver.wcs.WCSInfo;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.custommonkey.xmlunit.NamespaceContext;
+import org.custommonkey.xmlunit.SimpleNamespaceContext;
+import org.custommonkey.xmlunit.XMLUnit;
+import org.custommonkey.xmlunit.XpathEngine;
+import org.geoserver.data.test.SystemTestData;
+import org.geoserver.test.GeoServerSystemTestSupport;
+import static org.geoserver.inspire.InspireSchema.COMMON_NAMESPACE;
+import static org.geoserver.inspire.InspireSchema.DLS_NAMESPACE;
+import org.geoserver.inspire.InspireMetadata;
+import org.geoserver.wcs.WCSInfo;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import java.util.HashMap;
 
 public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
 
@@ -72,64 +76,41 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
 
         final Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
 
-        NodeList nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "ExtendedCapabilities");
-        assertEquals("Existence of ExtendedCapabilities element", 1, nodeList.getLength());
+        HashMap namespaces = new HashMap();
+        namespaces.put("inspire_common", COMMON_NAMESPACE);
+        namespaces.put("inspire_dls", DLS_NAMESPACE);
+        NamespaceContext nsCtx = new SimpleNamespaceContext(namespaces);
+        XpathEngine xpath = XMLUnit.newXpathEngine();
+        xpath.setNamespaceContext(nsCtx);
 
-        final Element extendedCapabilities = (Element) nodeList.item(0);
+        assertEquals("Existence of ExtendedCapabilities element", "1",
+                xpath.evaluate("count(//inspire_dls:ExtendedCapabilities)", dom));
 
-        nodeList = extendedCapabilities.getElementsByTagNameNS(COMMON_NAMESPACE, "MetadataUrl");
-        assertEquals("Existence of MetadataURL element", 1, nodeList.getLength());
+        assertEquals("Expected MetadataURL URL",
+                "http://foo.com?bar=baz",
+                xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_common:MetadataUrl/inspire_common:URL", dom));
 
-        final Element metadataUrl = (Element) nodeList.item(0);
+        assertEquals("Expected default language",
+                "fre",
+                xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_common:SupportedLanguages/inspire_common:DefaultLanguage/inspire_common:Language", dom));
 
-        nodeList = metadataUrl.getElementsByTagNameNS(COMMON_NAMESPACE, "URL");
-        assertEquals("Existence of URL element", 1, nodeList.getLength());
-
-        final Element url = (Element) nodeList.item(0);
+        // Can decide to repeat default language in list of supported languages
+        // but it isn't required by INSPIRE so won't test for it
         
-        assertEquals("http://foo.com?bar=baz", url.getFirstChild().getNodeValue());
-
-        nodeList = extendedCapabilities.getElementsByTagNameNS(COMMON_NAMESPACE, "SupportedLanguages");
-        assertEquals("Existence of SupportedLanguages element", 1, nodeList.getLength());
-
-        final Element supportedLanguages = (Element) nodeList.item(0);
+        assertEquals("Expected response language",
+                "fre",
+                xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_common:ResponseLanguage/inspire_common:Language", dom));
         
-        nodeList = supportedLanguages.getElementsByTagNameNS(COMMON_NAMESPACE, "DefaultLanguage");
-        assertEquals("Existence of DefaultLanguage element", 1, nodeList.getLength());
+        assertEquals("Expected response spatial dataset identifier code",
+                "one",
+                xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_dls:SpatialDataSetIdentifier/inspire_common:Code", dom));
         
-        final Element defaultLanguage = (Element) nodeList.item(0);
-
-        nodeList = defaultLanguage.getElementsByTagNameNS(COMMON_NAMESPACE, "Language");
-        assertEquals("Existence of Language element", 1, nodeList.getLength());
-        
-        final Element dlLanguage = (Element) nodeList.item(0);
-        
-        assertEquals("fre", dlLanguage.getFirstChild().getNodeValue());
-
-        // It is not necessary to repeat the DefaultLanguage as a SupportedLanguage
-        // so won't test SupportedLanguage although implementation does repeat
-        // it at time of writing 2015-03-17.
-        
-        nodeList = extendedCapabilities.getElementsByTagNameNS(COMMON_NAMESPACE, "ResponseLanguage");
-        assertEquals("Existence of ResponseLanguage element", 1, nodeList.getLength());
-        
-        final Element responseLanguage = (Element) nodeList.item(0);
-
-        nodeList = responseLanguage.getElementsByTagNameNS(COMMON_NAMESPACE, "Language");
-        assertEquals("Existence of Language element", 1, nodeList.getLength());
-        
-        final Element rlLanguage = (Element) nodeList.item(0);
-        
-        assertEquals("fre", rlLanguage.getFirstChild().getNodeValue());
-
-        final Element sdi = getFirstElementByTagName(extendedCapabilities, "inspire_dls:SpatialDataSetIdentifier");
-        final Element code = getFirstElementByTagName(sdi, "inspire_common:Code");
-        assertEquals("one", code.getFirstChild().getNodeValue());
-        final Element ns = getFirstElementByTagName(sdi, "inspire_common:Namespace");
-        assertEquals("http://www.geoserver.org/inspire/one", ns.getFirstChild().getNodeValue());
+        assertEquals("Expected spatial dataset identifier namespace",
+                "http://www.geoserver.org/inspire/one",
+                xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_dls:SpatialDataSetIdentifier/inspire_common:Namespace", dom));
 
     }
-
+    
     @Test
     @Ignore
     public void testChangeMediaType() throws Exception {
