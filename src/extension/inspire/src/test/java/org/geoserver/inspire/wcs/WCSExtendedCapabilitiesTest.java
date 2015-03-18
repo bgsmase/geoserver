@@ -25,6 +25,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import java.util.HashMap;
+import org.custommonkey.xmlunit.exceptions.XpathException;
 
 public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
 
@@ -76,13 +77,8 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
 
         final Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
 
-        HashMap namespaces = new HashMap();
-        namespaces.put("inspire_common", COMMON_NAMESPACE);
-        namespaces.put("inspire_dls", DLS_NAMESPACE);
-        NamespaceContext nsCtx = new SimpleNamespaceContext(namespaces);
-        XpathEngine xpath = XMLUnit.newXpathEngine();
-        xpath.setNamespaceContext(nsCtx);
-
+        XpathEngine xpath = getXpathEngine();
+        
         assertEquals("Existence of ExtendedCapabilities element", "1",
                 xpath.evaluate("count(//inspire_dls:ExtendedCapabilities)", dom));
 
@@ -96,21 +92,20 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
 
         // Can decide to repeat default language in list of supported languages
         // but it isn't required by INSPIRE so won't test for it
-        
         assertEquals("Expected response language",
                 "fre",
                 xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_common:ResponseLanguage/inspire_common:Language", dom));
-        
+
         assertEquals("Expected response spatial dataset identifier code",
                 "one",
                 xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_dls:SpatialDataSetIdentifier/inspire_common:Code", dom));
-        
+
         assertEquals("Expected spatial dataset identifier namespace",
                 "http://www.geoserver.org/inspire/one",
                 xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_dls:SpatialDataSetIdentifier/inspire_common:Namespace", dom));
 
     }
-    
+
     @Test
     public void testChangeMediaType() throws Exception {
         WCSInfo wcs = getGeoServer().getService(WCSInfo.class);
@@ -119,34 +114,41 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
         wcs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key, "one,http://www.geoserver.org/inspire/one");
         getGeoServer().save(wcs);
 
-        Document dom = getAsDOM("wcs?request=GetCapabilities&service=WCS&acceptVersions=2.0.0");
-        // print(dom);
-        assertEquals(DLS_NAMESPACE, dom.getDocumentElement().getAttribute("xmlns:inspire_dls"));
+        Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
+
         assertMetadataUrlAndMediaType(dom, "http://foo.com?bar=baz", "application/vnd.ogc.csw.GetRecordByIdResponse_xml");
 
         wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_TYPE.key, "application/xml");
         getGeoServer().save(wcs);
 
-        dom = getAsDOM("wcs?request=GetCapabilities&service=WCS&acceptVersions=2.0.0");
-        assertEquals(DLS_NAMESPACE, dom.getDocumentElement().getAttribute("xmlns:inspire_dls"));
+        dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
+
         assertMetadataUrlAndMediaType(dom, "http://foo.com?bar=baz", "application/xml");
     }
 
-    void assertMetadataUrlAndMediaType(Document dom, String metadataUrl, String metadataMediaType) {
-        final Element extendedCaps = getFirstElementByTagName(dom,
-                "inspire_dls:ExtendedCapabilities");
-        assertNotNull(extendedCaps);
+    private void assertMetadataUrlAndMediaType(Document dom, String metadataUrl, String metadataMediaType) throws XpathException {
+        XpathEngine xpath = getXpathEngine();
 
-        final Element mdUrl = getFirstElementByTagName(extendedCaps, "inspire_common:MetadataUrl");
-        assertNotNull(mdUrl);
+        assertEquals("Existence of ExtendedCapabilities element", "1",
+                xpath.evaluate("count(//inspire_dls:ExtendedCapabilities)", dom));
 
-        final Element url = getFirstElementByTagName(mdUrl, "inspire_common:URL");
-        assertNotNull(url);
-        assertEquals(metadataUrl, url.getFirstChild().getNodeValue());
+        assertEquals("Expected MetadataURL URL",
+                metadataUrl,
+                xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_common:MetadataUrl/inspire_common:URL", dom));
 
-        final Element mediaType = getFirstElementByTagName(mdUrl, "inspire_common:MediaType");
-        assertNotNull(mediaType);
-        assertEquals(metadataMediaType, mediaType.getFirstChild().getNodeValue());
+        assertEquals("Expected MetadataURL MediaType",
+                metadataMediaType,
+                xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_common:MetadataUrl/inspire_common:MediaType", dom));
 
+    }
+
+    private XpathEngine getXpathEngine() {
+        HashMap namespaces = new HashMap();
+        namespaces.put("inspire_common", COMMON_NAMESPACE);
+        namespaces.put("inspire_dls", DLS_NAMESPACE);
+        NamespaceContext nsCtx = new SimpleNamespaceContext(namespaces);
+        XpathEngine xpath = XMLUnit.newXpathEngine();
+        xpath.setNamespaceContext(nsCtx);
+        return xpath;
     }
 }
