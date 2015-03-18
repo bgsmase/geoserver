@@ -33,7 +33,7 @@ import org.geoserver.web.util.MetadataMapModel;
 import org.geoserver.wfs.WFSInfo;
 
 /**
- * Panel for the WMS admin page to set the WMS INSPIRE extension preferences.
+ * Panel for the service admin page to set the service INSPIRE extension preferences.
  */
 public class InspireAdminPanel extends AdminPagePanel {
 
