@@ -65,10 +65,6 @@ public class WCSExtendedCapabilitiesProvider extends
 
     @Override
     public void encodeExtendedContents(Translator tx, WCSInfo wcs, List<CoverageInfo> coverages, GetCapabilitiesType request) throws IOException {
-        // I need to work out how version is decided with acceptversions param
-        // A bit different from WFS as WCS versions have different types
-        String version = request.getAcceptVersions().getVersion().get(0);
-
         if (!existRequiredMetadata(wcs)) return;
         // IGN : INSPIRE SCENARIO 1
         tx.start("ows:ExtendedCapabilities");
