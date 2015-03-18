@@ -112,11 +112,11 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
     }
     
     @Test
-    @Ignore
     public void testChangeMediaType() throws Exception {
         WCSInfo wcs = getGeoServer().getService(WCSInfo.class);
         wcs.getMetadata().put(InspireMetadata.LANGUAGE.key, "fre");
         wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_URL.key, "http://foo.com?bar=baz");
+        wcs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key, "one,http://www.geoserver.org/inspire/one");
         getGeoServer().save(wcs);
 
         Document dom = getAsDOM("wcs?request=GetCapabilities&service=WCS&acceptVersions=2.0.0");
