@@ -130,6 +130,9 @@ public class WCSExtendedCapabilitiesProvider extends
 
     private boolean existRequiredMetadata(WCSInfo wcs) {
         if (wcs.getMetadata().isEmpty()) return false; 
+        if (wcs.getMetadata().get(SERVICE_METADATA_URL.key) == null) return false;
+        String url = (String) wcs.getMetadata().get(SERVICE_METADATA_URL.key);
+        if (url.trim().equals("")) return false;
         UniqueResourceIdentifiers ids = (UniqueResourceIdentifiers)  wcs.getMetadata().get(SPATIAL_DATASET_IDENTIFIER_TYPE.key, UniqueResourceIdentifiers.class);
         return ids != null && !ids.isEmpty();
     }
