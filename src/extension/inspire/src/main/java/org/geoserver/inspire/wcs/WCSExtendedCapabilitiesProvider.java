@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.util.List;
 import net.opengis.wcs20.GetCapabilitiesType;
 import org.geoserver.catalog.CoverageInfo;
+import static org.geoserver.inspire.InspireSchema.COMMON_NAMESPACE;
+import static org.geoserver.inspire.InspireSchema.DLS_NAMESPACE;
+import static org.geoserver.inspire.InspireSchema.DLS_SCHEMA;
 
 import org.geoserver.inspire.UniqueResourceIdentifier;
 import org.geoserver.inspire.UniqueResourceIdentifiers;
@@ -25,14 +28,9 @@ import org.xml.sax.helpers.NamespaceSupport;
 public class WCSExtendedCapabilitiesProvider extends
         org.geoserver.wcs2_0.response.WCSExtendedCapabilitiesProvider {
 
-    public static final String COMMON_NAMESPACE = "http://inspire.ec.europa.eu/schemas/common/1.0";
-    public static final String DLS_NAMESPACE = "http://inspire.ec.europa.eu/schemas/inspire_dls/1.0";
-
     @Override
     public String[] getSchemaLocations(String schemaBaseURL) {
-        return new String[]{COMMON_NAMESPACE,
-            "http://inspire.ec.europa.eu/schemas/common/1.0/common.xsd", DLS_NAMESPACE,
-            "http://inspire.ec.europa.eu/schemas/inspire_dls/1.0/inspire_dls.xsd"};
+        return new String[]{DLS_NAMESPACE, DLS_SCHEMA};
     }
 
     @Override

@@ -11,7 +11,7 @@ import static org.geoserver.inspire.InspireMetadata.SERVICE_METADATA_URL;
 import static org.geoserver.inspire.InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE;
 import static org.geoserver.inspire.InspireSchema.COMMON_NAMESPACE;
 import static org.geoserver.inspire.InspireSchema.DLS_NAMESPACE;
-
+import static org.geoserver.inspire.InspireSchema.DLS_SCHEMA;
 
 import java.io.IOException;
 
@@ -27,12 +27,12 @@ import org.xml.sax.helpers.NamespaceSupport;
 public class WFSExtendedCapabilitiesProvider implements
         org.geoserver.wfs.WFSExtendedCapabilitiesProvider {
 
+    @Override
     public String[] getSchemaLocations(String schemaBaseURL) {
-        return new String[] { COMMON_NAMESPACE,
-                "http://inspire.ec.europa.eu/schemas/common/1.0/common.xsd", DLS_NAMESPACE,
-                "http://inspire.ec.europa.eu/schemas/inspire_dls/1.0/inspire_dls.xsd" };
+        return new String[]{DLS_NAMESPACE, DLS_SCHEMA};
     }
 
+    @Override
     public void registerNamespaces(NamespaceSupport namespaces) {
         namespaces.declarePrefix("gml", "http://schemas.opengis.net/gml");
         namespaces
@@ -47,6 +47,7 @@ public class WFSExtendedCapabilitiesProvider implements
         namespaces.declarePrefix("inspire_dls", DLS_NAMESPACE);
     }
 
+    @Override
     public void encode(Translator tx, WFSInfo wfs, GetCapabilitiesRequest request)
             throws IOException {
         String version = GetCapabilities.version(request);
@@ -71,7 +72,7 @@ public class WFSExtendedCapabilitiesProvider implements
         tx.end("inspire_common:URL");
         tx.start("inspire_common:MediaType");
         String type = (String) wfs.getMetadata().get(SERVICE_METADATA_TYPE.key);
-        if(type == null) {
+        if (type == null) {
             type = "application/vnd.ogc.csw.GetRecordByIdResponse_xml";
         }
         tx.chars(type);
@@ -102,16 +103,16 @@ public class WFSExtendedCapabilitiesProvider implements
         tx.chars(language);
         tx.end("inspire_common:Language");
         tx.end("inspire_common:ResponseLanguage");
-        
+
         // unique spatial dataset identifiers
         UniqueResourceIdentifiers ids = (UniqueResourceIdentifiers) wfs.getMetadata().get(SPATIAL_DATASET_IDENTIFIER_TYPE.key, UniqueResourceIdentifiers.class);
-        if(ids != null) {
+        if (ids != null) {
             for (UniqueResourceIdentifier id : ids) {
                 tx.start("inspire_dls:SpatialDataSetIdentifier");
                 tx.start("inspire_common:Code");
                 tx.chars(id.getCode());
                 tx.end("inspire_common:Code");
-                if(id.getNamespace() != null) {
+                if (id.getNamespace() != null) {
                     tx.start("inspire_common:Namespace");
                     tx.chars(id.getNamespace());
                     tx.end("inspire_common:Namespace");
