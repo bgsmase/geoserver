@@ -50,7 +50,47 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
         final Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
 
         final NodeList nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "ExtendedCapabilities");
-        assertTrue(nodeList.getLength() == 0);
+        assertEquals(0, nodeList.getLength());
+    }
+
+    @Test
+    public void testNoInspireElementWhenNoMetadataUrl() throws Exception {
+        WCSInfo wcs = getGeoServer().getService(WCSInfo.class);
+        wcs.getMetadata().put(InspireMetadata.LANGUAGE.key, "fre");
+        wcs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key, "one,http://www.geoserver.org/inspire/one");
+        getGeoServer().save(wcs);
+
+        final Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
+
+        final NodeList nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "ExtendedCapabilities");
+        assertEquals(0, nodeList.getLength());
+    }
+
+    @Test
+    public void testNoInspireElementWhenNoSpatialDataset() throws Exception {
+        WCSInfo wcs = getGeoServer().getService(WCSInfo.class);
+        wcs.getMetadata().put(InspireMetadata.LANGUAGE.key, "fre");
+        wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_URL.key, "http://foo.com?bar=baz");
+        getGeoServer().save(wcs);
+
+        final Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
+
+        final NodeList nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "ExtendedCapabilities");
+        assertEquals(0, nodeList.getLength());
+    }
+
+    @Test
+    public void testNoInspireElementWhenNoSpatialDatasetCode() throws Exception {
+        WCSInfo wcs = getGeoServer().getService(WCSInfo.class);
+        wcs.getMetadata().put(InspireMetadata.LANGUAGE.key, "fre");
+        wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_URL.key, "http://foo.com?bar=baz");
+        wcs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key, ",http://www.geoserver.org/inspire/one");
+        getGeoServer().save(wcs);
+
+        final Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
+
+        final NodeList nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "ExtendedCapabilities");
+        assertEquals(0, nodeList.getLength());
     }
 
     @Test
