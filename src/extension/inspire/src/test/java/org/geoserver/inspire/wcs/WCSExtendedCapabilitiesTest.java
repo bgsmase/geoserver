@@ -6,10 +6,8 @@
 package org.geoserver.inspire.wcs;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.custommonkey.xmlunit.NamespaceContext;
 import org.custommonkey.xmlunit.SimpleNamespaceContext;
@@ -22,7 +20,6 @@ import static org.geoserver.inspire.InspireSchema.DLS_NAMESPACE;
 import org.geoserver.inspire.InspireMetadata;
 import org.geoserver.wcs.WCSInfo;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import java.util.HashMap;
 import org.custommonkey.xmlunit.exceptions.XpathException;
@@ -187,6 +184,49 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
         dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
 
         assertMetadataUrlAndMediaType(dom, "http://foo.com?bar=baz", "application/xml");
+    }
+
+    @Test
+    public void testAddSpatialDatasetIdentifier() throws Exception {
+        WCSInfo wcs = getGeoServer().getService(WCSInfo.class);
+        wcs.getMetadata().put(InspireMetadata.LANGUAGE.key, "fre");
+        wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_URL.key, "http://foo.com?bar=baz");
+        wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_TYPE.key, "application/vnd.ogc.csw.GetRecordByIdResponse_xml");
+        wcs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key, "one,http://www.geoserver.org/inspire/one,http://metadata.geoserver.org/id?one");
+        getGeoServer().save(wcs);
+
+        Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
+
+        XpathEngine xpath = getXpathEngine();
+
+        NodeList nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "SpatialDataSetIdentifier");
+        assertEquals(1, nodeList.getLength());
+
+        wcs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key,
+                "one,http://www.geoserver.org/inspire/one"
+                + ";two,,http://metadata.geoserver.org/id?two");
+        getGeoServer().save(wcs);
+
+        dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
+
+        nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "SpatialDataSetIdentifier");
+        assertEquals(2, nodeList.getLength());
+
+        assertEquals("Expected first spatial dataset identifier namespace",
+                "http://www.geoserver.org/inspire/one",
+                xpath.evaluate("//inspire_dls:SpatialDataSetIdentifier[inspire_common:Code = 'one']/inspire_common:Namespace", dom));
+
+        assertEquals("Expected first spatial dataset identifier no metadataURL",
+                "0",
+                xpath.evaluate("count(//inspire_dls:SpatialDataSetIdentifier[inspire_common:Code = 'one']/@metadataURL)", dom));
+
+        assertEquals("Expected second spatial dataset identifier metadataURL",
+                "http://metadata.geoserver.org/id?two",
+                xpath.evaluate("//inspire_dls:SpatialDataSetIdentifier[inspire_common:Code = 'two']/@metadataURL", dom));
+
+        assertEquals("Expected second spatial dataset identifier no namespace",
+                "0",
+                xpath.evaluate("count(//inspire_dls:SpatialDataSetIdentifier[inspire_common:Code = 'two']/inspire_common:Namespace)", dom));
     }
 
     private void assertMetadataUrlAndMediaType(Document dom, String metadataUrl, String metadataMediaType) throws XpathException {
