@@ -203,7 +203,7 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
         assertEquals(1, nodeList.getLength());
 
         wcs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key,
-                "one,http://www.geoserver.org/inspire/one"
+                "one,http://www.geoserver.org/inspire/one,"
                 + ";two,,http://metadata.geoserver.org/id?two");
         getGeoServer().save(wcs);
 
