@@ -112,7 +112,8 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
         WCSInfo wcs = getGeoServer().getService(WCSInfo.class);
         wcs.getMetadata().put(InspireMetadata.LANGUAGE.key, "fre");
         wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_URL.key, "http://foo.com?bar=baz");
-        wcs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key, "one,http://www.geoserver.org/inspire/one");
+        wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_TYPE.key, "application/vnd.iso.19139+xml");
+        wcs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key, "one,http://www.geoserver.org/inspire/one,http://metadata.geoserver.org/id?one");
         getGeoServer().save(wcs);
 
         final Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
@@ -125,6 +126,10 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
         assertEquals("Expected MetadataURL URL",
                 "http://foo.com?bar=baz",
                 xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_common:MetadataUrl/inspire_common:URL", dom));
+
+        assertEquals("Expected MetadataURL MediaType",
+                "application/vnd.iso.19139+xml",
+                xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_common:MetadataUrl/inspire_common:MediaType", dom));
 
         assertEquals("Expected default language",
                 "fre",
@@ -144,6 +149,9 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
                 "http://www.geoserver.org/inspire/one",
                 xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_dls:SpatialDataSetIdentifier/inspire_common:Namespace", dom));
 
+        assertEquals("Expected spatial dataset identifier metadata URL attribute",
+                "http://metadata.geoserver.org/id?one",
+                xpath.evaluate("//inspire_dls:ExtendedCapabilities/inspire_dls:SpatialDataSetIdentifier/@metadataURL", dom));
     }
 
     @Test
