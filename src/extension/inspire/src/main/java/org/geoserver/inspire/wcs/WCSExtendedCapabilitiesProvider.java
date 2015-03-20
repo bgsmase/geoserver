@@ -63,7 +63,9 @@ public class WCSExtendedCapabilitiesProvider extends
 
     @Override
     public void encodeExtendedContents(Translator tx, WCSInfo wcs, List<CoverageInfo> coverages, GetCapabilitiesType request) throws IOException {
-        if (!existRequiredMetadata(wcs)) return;
+        if (!existRequiredMetadata(wcs)) {
+            return;
+        }
         // IGN : INSPIRE SCENARIO 1
         tx.start("ows:ExtendedCapabilities");
         tx.start("inspire_dls:ExtendedCapabilities");
@@ -110,7 +112,11 @@ public class WCSExtendedCapabilitiesProvider extends
         UniqueResourceIdentifiers ids = (UniqueResourceIdentifiers) wcs.getMetadata().get(SPATIAL_DATASET_IDENTIFIER_TYPE.key, UniqueResourceIdentifiers.class);
         if (ids != null) {
             for (UniqueResourceIdentifier id : ids) {
-                tx.start("inspire_dls:SpatialDataSetIdentifier");
+                if (id.getMetadataURL() != null) {
+                    tx.start("inspire_dls:SpatialDataSetIdentifier", atts("metadataURL", id.getMetadataURL()));
+                } else {
+                    tx.start("inspire_dls:SpatialDataSetIdentifier");
+                }
                 tx.start("inspire_common:Code");
                 tx.chars(id.getCode());
                 tx.end("inspire_common:Code");
@@ -129,11 +135,17 @@ public class WCSExtendedCapabilitiesProvider extends
     }
 
     private boolean existRequiredMetadata(WCSInfo wcs) {
-        if (wcs.getMetadata().isEmpty()) return false; 
-        if (wcs.getMetadata().get(SERVICE_METADATA_URL.key) == null) return false;
+        if (wcs.getMetadata().isEmpty()) {
+            return false;
+        }
+        if (wcs.getMetadata().get(SERVICE_METADATA_URL.key) == null) {
+            return false;
+        }
         String url = (String) wcs.getMetadata().get(SERVICE_METADATA_URL.key);
-        if (url.trim().equals("")) return false;
-        UniqueResourceIdentifiers ids = (UniqueResourceIdentifiers)  wcs.getMetadata().get(SPATIAL_DATASET_IDENTIFIER_TYPE.key, UniqueResourceIdentifiers.class);
+        if (url.trim().equals("")) {
+            return false;
+        }
+        UniqueResourceIdentifiers ids = (UniqueResourceIdentifiers) wcs.getMetadata().get(SPATIAL_DATASET_IDENTIFIER_TYPE.key, UniqueResourceIdentifiers.class);
         return ids != null && !ids.isEmpty();
     }
 
