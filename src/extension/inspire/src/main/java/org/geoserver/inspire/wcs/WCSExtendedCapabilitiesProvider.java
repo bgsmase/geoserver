@@ -35,13 +35,6 @@ public class WCSExtendedCapabilitiesProvider extends
 
     @Override
     public void registerNamespaces(NamespaceSupport namespaces) {
-        namespaces.declarePrefix("gml", "http://schemas.opengis.net/gml");
-        namespaces
-                .declarePrefix("gmd", "http://schemas.opengis.net/iso/19139/20060504/gmd/gmd.xsd");
-        namespaces
-                .declarePrefix("gco", "http://schemas.opengis.net/iso/19139/20060504/gco/gco.xsd");
-        namespaces
-                .declarePrefix("srv", "http://schemas.opengis.net/iso/19139/20060504/srv/srv.xsd");
         // IGN : We add another xmlns for inspire_common
         namespaces.declarePrefix("inspire_common", COMMON_NAMESPACE);
         // IGN : We add another xmlns for inspire_dls
