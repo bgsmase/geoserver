@@ -78,8 +78,7 @@ public class WCSExtendedCapabilitiesProvider extends
         tx.start("ows:ExtendedCapabilities");
         tx.start("inspire_dls:ExtendedCapabilities");
 
-        tx.start("inspire_common:MetadataUrl",
-                atts("xsi:type", "inspire_common:resourceLocatorType"));
+        tx.start("inspire_common:MetadataUrl");
         tx.start("inspire_common:URL");
         tx.chars(metadataURL);
         tx.end("inspire_common:URL");
@@ -91,8 +90,7 @@ public class WCSExtendedCapabilitiesProvider extends
         tx.end("inspire_common:MediaType");
         tx.end("inspire_common:MetadataUrl");
 
-        tx.start("inspire_common:SupportedLanguages",
-                atts("xsi:type", "inspire_common:supportedLanguagesType"));
+        tx.start("inspire_common:SupportedLanguages");
         language = language != null ? language : "eng";
         tx.start("inspire_common:DefaultLanguage");
         tx.start("inspire_common:Language");
