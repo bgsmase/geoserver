@@ -77,19 +77,16 @@ public class WCSExtendedCapabilitiesProvider extends
         // IGN : INSPIRE SCENARIO 1
         tx.start("ows:ExtendedCapabilities");
         tx.start("inspire_dls:ExtendedCapabilities");
-
         tx.start("inspire_common:MetadataUrl");
         tx.start("inspire_common:URL");
         tx.chars(metadataURL);
         tx.end("inspire_common:URL");
-        tx.start("inspire_common:MediaType");
-        if (mediaType == null) {
-            mediaType = "application/vnd.ogc.csw.GetRecordByIdResponse_xml";
+        if (mediaType != null) {
+            tx.start("inspire_common:MediaType");
+            tx.chars(mediaType);
+            tx.end("inspire_common:MediaType");
         }
-        tx.chars(mediaType);
-        tx.end("inspire_common:MediaType");
         tx.end("inspire_common:MetadataUrl");
-
         tx.start("inspire_common:SupportedLanguages");
         language = language != null ? language : "eng";
         tx.start("inspire_common:DefaultLanguage");
@@ -97,15 +94,12 @@ public class WCSExtendedCapabilitiesProvider extends
         tx.chars(language);
         tx.end("inspire_common:Language");
         tx.end("inspire_common:DefaultLanguage");
-
         tx.end("inspire_common:SupportedLanguages");
-
         tx.start("inspire_common:ResponseLanguage");
         tx.start("inspire_common:Language");
         tx.chars(language);
         tx.end("inspire_common:Language");
         tx.end("inspire_common:ResponseLanguage");
-
         for (UniqueResourceIdentifier id : ids) {
             if (id.getMetadataURL() != null) {
                 tx.start("inspire_dls:SpatialDataSetIdentifier", atts("metadataURL", id.getMetadataURL()));
@@ -122,7 +116,6 @@ public class WCSExtendedCapabilitiesProvider extends
             }
             tx.end("inspire_dls:SpatialDataSetIdentifier");
         }
-
         tx.end("inspire_dls:ExtendedCapabilities");
         tx.end("ows:ExtendedCapabilities");
     }
