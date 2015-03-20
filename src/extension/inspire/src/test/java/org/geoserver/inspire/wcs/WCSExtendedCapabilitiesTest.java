@@ -108,6 +108,20 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
     }
 
     @Test
+    public void testNoMediaTypeElement() throws Exception {
+        WCSInfo wcs = getGeoServer().getService(WCSInfo.class);
+        wcs.getMetadata().put(InspireMetadata.LANGUAGE.key, "fre");
+        wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_URL.key, "http://foo.com?bar=baz");
+        wcs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key, "one,http://www.geoserver.org/inspire/one,http://metadata.geoserver.org/id?one");
+        getGeoServer().save(wcs);
+
+        final Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
+
+        final NodeList nodeList = dom.getElementsByTagNameNS(COMMON_NAMESPACE, "MediaType");
+        assertEquals(0, nodeList.getLength());
+    }
+
+    @Test
     public void testExtendedCaps200() throws Exception {
         WCSInfo wcs = getGeoServer().getService(WCSInfo.class);
         wcs.getMetadata().put(InspireMetadata.LANGUAGE.key, "fre");
@@ -119,7 +133,7 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
         final Document dom = getAsDOM(WCS_2_0_0_GETCAPREQUEST);
 
         XpathEngine xpath = getXpathEngine();
-        
+
         assertEquals("Existence of ExtendedCapabilities element", "1",
                 xpath.evaluate("count(//inspire_dls:ExtendedCapabilities)", dom));
 
@@ -159,6 +173,7 @@ public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
         WCSInfo wcs = getGeoServer().getService(WCSInfo.class);
         wcs.getMetadata().put(InspireMetadata.LANGUAGE.key, "fre");
         wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_URL.key, "http://foo.com?bar=baz");
+        wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_TYPE.key, "application/vnd.ogc.csw.GetRecordByIdResponse_xml");
         wcs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key, "one,http://www.geoserver.org/inspire/one");
         getGeoServer().save(wcs);
 
