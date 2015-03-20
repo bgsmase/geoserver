@@ -63,35 +63,36 @@ public class WCSExtendedCapabilitiesProvider extends
 
     @Override
     public void encodeExtendedContents(Translator tx, WCSInfo wcs, List<CoverageInfo> coverages, GetCapabilitiesType request) throws IOException {
-        if (!existRequiredMetadata(wcs)) {
+        String metadataURL = (String) wcs.getMetadata().get(SERVICE_METADATA_URL.key);
+        String mediaType = (String) wcs.getMetadata().get(SERVICE_METADATA_TYPE.key);
+        String language = (String) wcs.getMetadata().get(LANGUAGE.key);
+        UniqueResourceIdentifiers ids = (UniqueResourceIdentifiers) wcs.getMetadata().get(SPATIAL_DATASET_IDENTIFIER_TYPE.key, UniqueResourceIdentifiers.class);
+        //Don't create extended capabilities element if mandatory content not present
+        if (metadataURL == null) {
+            return;
+        }
+        if (ids == null || ids.isEmpty()) {
             return;
         }
         // IGN : INSPIRE SCENARIO 1
         tx.start("ows:ExtendedCapabilities");
         tx.start("inspire_dls:ExtendedCapabilities");
 
-        // Metadata URL
         tx.start("inspire_common:MetadataUrl",
                 atts("xsi:type", "inspire_common:resourceLocatorType"));
-        String metadataURL = (String) wcs.getMetadata().get(SERVICE_METADATA_URL.key);
         tx.start("inspire_common:URL");
-        if (metadataURL != null) {
-            tx.chars(metadataURL);
-        }
+        tx.chars(metadataURL);
         tx.end("inspire_common:URL");
         tx.start("inspire_common:MediaType");
-        String type = (String) wcs.getMetadata().get(SERVICE_METADATA_TYPE.key);
-        if (type == null) {
-            type = "application/vnd.ogc.csw.GetRecordByIdResponse_xml";
+        if (mediaType == null) {
+            mediaType = "application/vnd.ogc.csw.GetRecordByIdResponse_xml";
         }
-        tx.chars(type);
+        tx.chars(mediaType);
         tx.end("inspire_common:MediaType");
         tx.end("inspire_common:MetadataUrl");
 
-        // SupportedLanguages
         tx.start("inspire_common:SupportedLanguages",
                 atts("xsi:type", "inspire_common:supportedLanguagesType"));
-        String language = (String) wcs.getMetadata().get(LANGUAGE.key);
         language = language != null ? language : "eng";
         tx.start("inspire_common:DefaultLanguage");
         tx.start("inspire_common:Language");
@@ -101,52 +102,30 @@ public class WCSExtendedCapabilitiesProvider extends
 
         tx.end("inspire_common:SupportedLanguages");
 
-        // ResponseLanguage
         tx.start("inspire_common:ResponseLanguage");
         tx.start("inspire_common:Language");
         tx.chars(language);
         tx.end("inspire_common:Language");
         tx.end("inspire_common:ResponseLanguage");
 
-        // unique spatial dataset identifiers
-        UniqueResourceIdentifiers ids = (UniqueResourceIdentifiers) wcs.getMetadata().get(SPATIAL_DATASET_IDENTIFIER_TYPE.key, UniqueResourceIdentifiers.class);
-        if (ids != null) {
-            for (UniqueResourceIdentifier id : ids) {
-                if (id.getMetadataURL() != null) {
-                    tx.start("inspire_dls:SpatialDataSetIdentifier", atts("metadataURL", id.getMetadataURL()));
-                } else {
-                    tx.start("inspire_dls:SpatialDataSetIdentifier");
-                }
-                tx.start("inspire_common:Code");
-                tx.chars(id.getCode());
-                tx.end("inspire_common:Code");
-                if (id.getNamespace() != null) {
-                    tx.start("inspire_common:Namespace");
-                    tx.chars(id.getNamespace());
-                    tx.end("inspire_common:Namespace");
-                }
-                tx.end("inspire_dls:SpatialDataSetIdentifier");
+        for (UniqueResourceIdentifier id : ids) {
+            if (id.getMetadataURL() != null) {
+                tx.start("inspire_dls:SpatialDataSetIdentifier", atts("metadataURL", id.getMetadataURL()));
+            } else {
+                tx.start("inspire_dls:SpatialDataSetIdentifier");
             }
+            tx.start("inspire_common:Code");
+            tx.chars(id.getCode());
+            tx.end("inspire_common:Code");
+            if (id.getNamespace() != null) {
+                tx.start("inspire_common:Namespace");
+                tx.chars(id.getNamespace());
+                tx.end("inspire_common:Namespace");
+            }
+            tx.end("inspire_dls:SpatialDataSetIdentifier");
         }
 
         tx.end("inspire_dls:ExtendedCapabilities");
         tx.end("ows:ExtendedCapabilities");
-
     }
-
-    private boolean existRequiredMetadata(WCSInfo wcs) {
-        if (wcs.getMetadata().isEmpty()) {
-            return false;
-        }
-        if (wcs.getMetadata().get(SERVICE_METADATA_URL.key) == null) {
-            return false;
-        }
-        String url = (String) wcs.getMetadata().get(SERVICE_METADATA_URL.key);
-        if (url.trim().equals("")) {
-            return false;
-        }
-        UniqueResourceIdentifiers ids = (UniqueResourceIdentifiers) wcs.getMetadata().get(SPATIAL_DATASET_IDENTIFIER_TYPE.key, UniqueResourceIdentifiers.class);
-        return ids != null && !ids.isEmpty();
-    }
-
 }
