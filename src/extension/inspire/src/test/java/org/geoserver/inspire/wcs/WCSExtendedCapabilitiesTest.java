@@ -13,6 +13,7 @@ import org.custommonkey.xmlunit.NamespaceContext;
 import org.custommonkey.xmlunit.SimpleNamespaceContext;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.custommonkey.xmlunit.XpathEngine;
+import org.custommonkey.xmlunit.exceptions.XpathException;
 import org.geoserver.data.test.SystemTestData;
 import org.geoserver.test.GeoServerSystemTestSupport;
 import static org.geoserver.inspire.InspireSchema.COMMON_NAMESPACE;
@@ -22,13 +23,11 @@ import org.geoserver.wcs.WCSInfo;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import java.util.HashMap;
-import org.custommonkey.xmlunit.exceptions.XpathException;
 
 public class WCSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
 
     private static final String WCS_1_1_1_GETCAPREQUEST = "wcs?request=GetCapabilities&service=WCS&version=1.1.1";
     private static final String WCS_2_0_0_GETCAPREQUEST = "wcs?request=GetCapabilities&service=WCS&acceptVersions=2.0.0";
-    private static final String WCS_2_0_1_GETCAPREQUEST = "wcs?request=GetCapabilities&service=WCS&acceptVersions=2.0.1";
 
     @Override
     protected void setUpTestData(SystemTestData testData) throws Exception {
