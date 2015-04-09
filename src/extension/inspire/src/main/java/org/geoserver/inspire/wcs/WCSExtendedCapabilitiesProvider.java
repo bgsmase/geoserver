@@ -9,21 +9,23 @@ import static org.geoserver.inspire.InspireMetadata.LANGUAGE;
 import static org.geoserver.inspire.InspireMetadata.SERVICE_METADATA_TYPE;
 import static org.geoserver.inspire.InspireMetadata.SERVICE_METADATA_URL;
 import static org.geoserver.inspire.InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE;
-
-import java.io.IOException;
-import java.util.List;
-import net.opengis.wcs20.GetCapabilitiesType;
-import org.geoserver.catalog.CoverageInfo;
 import static org.geoserver.inspire.InspireSchema.COMMON_NAMESPACE;
 import static org.geoserver.inspire.InspireSchema.DLS_NAMESPACE;
 import static org.geoserver.inspire.InspireSchema.DLS_SCHEMA;
 
 import org.geoserver.inspire.UniqueResourceIdentifier;
 import org.geoserver.inspire.UniqueResourceIdentifiers;
+
+import net.opengis.wcs20.GetCapabilitiesType;
 import org.geoserver.wcs.WCSInfo;
+import org.geoserver.catalog.CoverageInfo;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.NamespaceSupport;
+
+import java.io.IOException;
+import java.util.List;
 
 public class WCSExtendedCapabilitiesProvider extends
         org.geoserver.wcs2_0.response.WCSExtendedCapabilitiesProvider {
@@ -59,6 +61,7 @@ public class WCSExtendedCapabilitiesProvider extends
         if (ids == null || ids.isEmpty()) {
             return;
         }
+        
         // IGN : INSPIRE SCENARIO 1
         tx.start("ows:ExtendedCapabilities");
         tx.start("inspire_dls:ExtendedCapabilities");

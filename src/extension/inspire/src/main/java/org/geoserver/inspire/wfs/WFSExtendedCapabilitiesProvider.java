@@ -13,16 +13,18 @@ import static org.geoserver.inspire.InspireSchema.COMMON_NAMESPACE;
 import static org.geoserver.inspire.InspireSchema.DLS_NAMESPACE;
 import static org.geoserver.inspire.InspireSchema.DLS_SCHEMA;
 
-import java.io.IOException;
-
 import org.geoserver.inspire.UniqueResourceIdentifier;
 import org.geoserver.inspire.UniqueResourceIdentifiers;
+
 import org.geoserver.wfs.GetCapabilities;
 import org.geoserver.wfs.WFSInfo;
 import org.geoserver.wfs.request.GetCapabilitiesRequest;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.NamespaceSupport;
+
+import java.io.IOException;
 
 public class WFSExtendedCapabilitiesProvider implements
         org.geoserver.wfs.WFSExtendedCapabilitiesProvider {
@@ -34,13 +36,6 @@ public class WFSExtendedCapabilitiesProvider implements
 
     @Override
     public void registerNamespaces(NamespaceSupport namespaces) {
-        namespaces.declarePrefix("gml", "http://schemas.opengis.net/gml");
-        namespaces
-                .declarePrefix("gmd", "http://schemas.opengis.net/iso/19139/20060504/gmd/gmd.xsd");
-        namespaces
-                .declarePrefix("gco", "http://schemas.opengis.net/iso/19139/20060504/gco/gco.xsd");
-        namespaces
-                .declarePrefix("srv", "http://schemas.opengis.net/iso/19139/20060504/srv/srv.xsd");
         // IGN : We add another xmlns for inspire_common
         namespaces.declarePrefix("inspire_common", COMMON_NAMESPACE);
         // IGN : We add another xmlns for inspire_dls
@@ -70,10 +65,7 @@ public class WFSExtendedCapabilitiesProvider implements
         // IGN : INSPIRE SCENARIO 1
         tx.start("ows:ExtendedCapabilities");
         tx.start("inspire_dls:ExtendedCapabilities");
-
-        // Metadata URL
-        tx.start("inspire_common:MetadataUrl",
-                atts("xsi:type", "inspire_common:resourceLocatorType"));
+        tx.start("inspire_common:MetadataUrl");
         tx.start("inspire_common:URL");
         tx.chars(metadataURL);
         tx.end("inspire_common:URL");
@@ -83,32 +75,19 @@ public class WFSExtendedCapabilitiesProvider implements
             tx.end("inspire_common:MediaType");
         }
         tx.end("inspire_common:MetadataUrl");
-
-        // SupportedLanguages
-        tx.start("inspire_common:SupportedLanguages",
-                atts("xsi:type", "inspire_common:supportedLanguagesType"));
+        tx.start("inspire_common:SupportedLanguages");
         language = language != null ? language : "eng";
         tx.start("inspire_common:DefaultLanguage");
         tx.start("inspire_common:Language");
         tx.chars(language);
         tx.end("inspire_common:Language");
         tx.end("inspire_common:DefaultLanguage");
-        // TODO when more than one language
-        // tx.start("inspire_common:SupportedLanguage");
-        // tx.start("inspire_common:Language");
-        // tx.chars(language);
-        // tx.end("inspire_common:Language");
-        // tx.end("inspire_common:SupportedLanguage");
         tx.end("inspire_common:SupportedLanguages");
-
-        // ResponseLanguage
         tx.start("inspire_common:ResponseLanguage");
         tx.start("inspire_common:Language");
         tx.chars(language);
         tx.end("inspire_common:Language");
         tx.end("inspire_common:ResponseLanguage");
-
-        // unique spatial dataset identifiers
         for (UniqueResourceIdentifier id : ids) {
             if (id.getMetadataURL() != null) {
                 tx.start("inspire_dls:SpatialDataSetIdentifier", atts("metadataURL", id.getMetadataURL()));
@@ -127,7 +106,6 @@ public class WFSExtendedCapabilitiesProvider implements
         }
         tx.end("inspire_dls:ExtendedCapabilities");
         tx.end("ows:ExtendedCapabilities");
-
     }
 
     Attributes atts(String... atts) {
