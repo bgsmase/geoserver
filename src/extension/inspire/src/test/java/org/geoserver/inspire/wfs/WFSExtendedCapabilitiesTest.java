@@ -26,6 +26,7 @@ import java.util.HashMap;
 
 public class WFSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
     
+    private static final String WFS_1_0_0_GETCAPREQUEST = "wfs?request=GetCapabilities&service=WFS&version=1.0.0";
     private static final String WFS_1_1_0_GETCAPREQUEST = "wfs?request=GetCapabilities&service=WFS&version=1.1.0";
     private static final String WFS_2_0_0_GETCAPREQUEST = "wfs?request=GetCapabilities&service=WFS&acceptVersions=2.0.0";
 
@@ -87,6 +88,20 @@ public class WFSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
 
         final NodeList nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "ExtendedCapabilities");
         assertEquals(0, nodeList.getLength());
+    }
+
+    @Test
+    public void testNoInspireElement100() throws Exception {
+        WFSInfo wfs = getGeoServer().getService(WFSInfo.class);
+        wfs.getMetadata().put(InspireMetadata.LANGUAGE.key, "fre");
+        wfs.getMetadata().put(InspireMetadata.SERVICE_METADATA_URL.key, "http://foo.com?bar=baz");
+        wfs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key, "one,http://www.geoserver.org/inspire/one");
+        getGeoServer().save(wfs);
+
+        final Document dom = getAsDOM(WFS_1_0_0_GETCAPREQUEST);
+
+        final NodeList nodeList = dom.getElementsByTagNameNS(DLS_NAMESPACE, "ExtendedCapabilities");
+        assertTrue(nodeList.getLength() == 0);
     }
 
     @Test
