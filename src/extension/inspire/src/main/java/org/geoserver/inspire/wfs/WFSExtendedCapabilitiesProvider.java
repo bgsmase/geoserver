@@ -51,9 +51,19 @@ public class WFSExtendedCapabilitiesProvider implements
     public void encode(Translator tx, WFSInfo wfs, GetCapabilitiesRequest request)
             throws IOException {
         String version = GetCapabilities.version(request);
-
         // can't add to a pre 1.1.0 version
         if ("1.0.0".equals(version)) {
+            return;
+        }
+        String metadataURL = (String) wfs.getMetadata().get(SERVICE_METADATA_URL.key);
+        String mediaType = (String) wfs.getMetadata().get(SERVICE_METADATA_TYPE.key);
+        String language = (String) wfs.getMetadata().get(LANGUAGE.key);
+        UniqueResourceIdentifiers ids = (UniqueResourceIdentifiers) wfs.getMetadata().get(SPATIAL_DATASET_IDENTIFIER_TYPE.key, UniqueResourceIdentifiers.class);
+        //Don't create extended capabilities element if mandatory content not present
+        if (metadataURL == null) {
+            return;
+        }
+        if (ids == null || ids.isEmpty()) {
             return;
         }
 
@@ -64,25 +74,19 @@ public class WFSExtendedCapabilitiesProvider implements
         // Metadata URL
         tx.start("inspire_common:MetadataUrl",
                 atts("xsi:type", "inspire_common:resourceLocatorType"));
-        String metadataURL = (String) wfs.getMetadata().get(SERVICE_METADATA_URL.key);
         tx.start("inspire_common:URL");
-        if (metadataURL != null) {
-            tx.chars(metadataURL);
-        }
+        tx.chars(metadataURL);
         tx.end("inspire_common:URL");
-        tx.start("inspire_common:MediaType");
-        String type = (String) wfs.getMetadata().get(SERVICE_METADATA_TYPE.key);
-        if (type == null) {
-            type = "application/vnd.ogc.csw.GetRecordByIdResponse_xml";
+        if (mediaType != null) {
+            tx.start("inspire_common:MediaType");
+            tx.chars(mediaType);
+            tx.end("inspire_common:MediaType");
         }
-        tx.chars(type);
-        tx.end("inspire_common:MediaType");
         tx.end("inspire_common:MetadataUrl");
 
         // SupportedLanguages
         tx.start("inspire_common:SupportedLanguages",
                 atts("xsi:type", "inspire_common:supportedLanguagesType"));
-        String language = (String) wfs.getMetadata().get(LANGUAGE.key);
         language = language != null ? language : "eng";
         tx.start("inspire_common:DefaultLanguage");
         tx.start("inspire_common:Language");
@@ -105,22 +109,22 @@ public class WFSExtendedCapabilitiesProvider implements
         tx.end("inspire_common:ResponseLanguage");
 
         // unique spatial dataset identifiers
-        UniqueResourceIdentifiers ids = (UniqueResourceIdentifiers) wfs.getMetadata().get(SPATIAL_DATASET_IDENTIFIER_TYPE.key, UniqueResourceIdentifiers.class);
-        if (ids != null) {
-            for (UniqueResourceIdentifier id : ids) {
+        for (UniqueResourceIdentifier id : ids) {
+            if (id.getMetadataURL() != null) {
+                tx.start("inspire_dls:SpatialDataSetIdentifier", atts("metadataURL", id.getMetadataURL()));
+            } else {
                 tx.start("inspire_dls:SpatialDataSetIdentifier");
-                tx.start("inspire_common:Code");
-                tx.chars(id.getCode());
-                tx.end("inspire_common:Code");
-                if (id.getNamespace() != null) {
-                    tx.start("inspire_common:Namespace");
-                    tx.chars(id.getNamespace());
-                    tx.end("inspire_common:Namespace");
-                }
-                tx.end("inspire_dls:SpatialDataSetIdentifier");
             }
+            tx.start("inspire_common:Code");
+            tx.chars(id.getCode());
+            tx.end("inspire_common:Code");
+            if (id.getNamespace() != null) {
+                tx.start("inspire_common:Namespace");
+                tx.chars(id.getNamespace());
+                tx.end("inspire_common:Namespace");
+            }
+            tx.end("inspire_dls:SpatialDataSetIdentifier");
         }
-
         tx.end("inspire_dls:ExtendedCapabilities");
         tx.end("ows:ExtendedCapabilities");
 
