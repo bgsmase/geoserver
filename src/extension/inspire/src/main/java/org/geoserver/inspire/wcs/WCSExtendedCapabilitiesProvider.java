@@ -41,14 +41,6 @@ public class WCSExtendedCapabilitiesProvider extends
         namespaces.declarePrefix("inspire_dls", DLS_NAMESPACE);
     }
 
-    Attributes atts(String... atts) {
-        AttributesImpl attributes = new AttributesImpl();
-        for (int i = 0; i < atts.length; i += 2) {
-            attributes.addAttribute(null, atts[i], atts[i], null, atts[i + 1]);
-        }
-        return attributes;
-    }
-
     @Override
     public void encodeExtendedOperations(Translator tx, WCSInfo wcs, GetCapabilitiesType request) throws IOException {
         //INSPIRE has nothing to add to operations section
@@ -111,5 +103,13 @@ public class WCSExtendedCapabilitiesProvider extends
         }
         tx.end("inspire_dls:ExtendedCapabilities");
         tx.end("ows:ExtendedCapabilities");
+    }
+    
+    Attributes atts(String... atts) {
+        AttributesImpl attributes = new AttributesImpl();
+        for (int i = 0; i < atts.length; i += 2) {
+            attributes.addAttribute(null, atts[i], atts[i], null, atts[i + 1]);
+        }
+        return attributes;
     }
 }
