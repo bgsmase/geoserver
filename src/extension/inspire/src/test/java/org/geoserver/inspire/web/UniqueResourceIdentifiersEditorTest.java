@@ -59,12 +59,12 @@ public class UniqueResourceIdentifiersEditorTest extends GeoServerWicketTestSupp
         tester.assertModelValue("form:panel:container:identifiers:listContainer:items:2:itemProperties:0:component:border:txt", "two");
 
         // remove the first identifier
-        tester.executeAjaxEvent("form:panel:container:identifiers:listContainer:items:1:itemProperties:2:component:remove", "onclick");
+        tester.executeAjaxEvent("form:panel:container:identifiers:listContainer:items:1:itemProperties:3:component:remove", "onclick");
         assertNull(tester.getLastRenderedPage().get("form:panel:container:identifiers:listContainer:items:1:itemProperties:0:component:border:txt"));
         tester.assertModelValue("form:panel:container:identifiers:listContainer:items:2:itemProperties:0:component:border:txt", "two");
         
         // remove the second as well
-        tester.executeAjaxEvent("form:panel:container:identifiers:listContainer:items:2:itemProperties:2:component:remove", "onclick");
+        tester.executeAjaxEvent("form:panel:container:identifiers:listContainer:items:2:itemProperties:3:component:remove", "onclick");
         assertNull(tester.getLastRenderedPage().get("form:panel:container:identifiers:listContainer:items:1:itemProperties:0:component:border:txt"));
         assertNull(tester.getLastRenderedPage().get("form:panel:container:identifiers:listContainer:items:2:itemProperties:0:component:border:txt"));
         
