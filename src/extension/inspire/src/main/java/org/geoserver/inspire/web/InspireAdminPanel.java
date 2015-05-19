@@ -26,6 +26,7 @@ import org.apache.wicket.model.ResourceModel;
 import org.geoserver.catalog.MetadataMap;
 import org.geoserver.config.ServiceInfo;
 import org.geoserver.inspire.UniqueResourceIdentifiers;
+import org.geoserver.wcs.WCSInfo;
 import org.geoserver.web.services.AdminPagePanel;
 import org.geoserver.web.util.MapModel;
 import org.geoserver.web.util.MetadataMapModel;
@@ -83,11 +84,13 @@ public class InspireAdminPanel extends AdminPagePanel {
 
         add(serviceMetadataRecordType);
         
-        // this is WFS specific, will appear only if the service is WFS
+        // this is download service specific, will appear only if the service is
+        // WFS or WCS
         WebMarkupContainer identifiersContainer = new WebMarkupContainer(
                 "datasetIdentifiersContainer");
-        boolean isWfs = model.getObject() instanceof WFSInfo;
-        identifiersContainer.setVisible(isWfs);
+        boolean isDownloadService = model.getObject() instanceof WFSInfo ||
+                model.getObject() instanceof WCSInfo;
+        identifiersContainer.setVisible(isDownloadService);
         add(identifiersContainer);
         IModel<UniqueResourceIdentifiers> sdiModel = new MetadataMapModel(metadata, SPATIAL_DATASET_IDENTIFIER_TYPE.key, UniqueResourceIdentifiers.class);
         UniqueResourceIdentifiersEditor identifiersEditor = new UniqueResourceIdentifiersEditor(

@@ -11,6 +11,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.tester.FormTester;
 import org.geoserver.inspire.InspireMetadata;
 import org.geoserver.inspire.UniqueResourceIdentifiers;
+import org.geoserver.wcs.WCSInfo;
 import org.geoserver.web.ComponentBuilder;
 import org.geoserver.web.FormTestPage;
 import org.geoserver.web.GeoServerWicketTestSupport;
@@ -54,6 +55,26 @@ public class InspirePanelTest extends GeoServerWicketTestSupport {
             @Override
             public Component buildComponent(String id) {
                 return new InspireAdminPanel(id, new Model(wfs));
+            }
+        }));
+
+    }
+
+    private void setupWCSPopulatedPage() {
+
+        final WCSInfo wcs = getGeoServer().getService(WCSInfo.class);
+        wcs.getMetadata().put(InspireMetadata.LANGUAGE.key, "fre");
+        wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_URL.key, "http://foo.com?bar=baz");
+        wcs.getMetadata().put(InspireMetadata.SERVICE_METADATA_TYPE.key, "application/vnd.iso.19139+xml");
+        wcs.getMetadata().put(InspireMetadata.SPATIAL_DATASET_IDENTIFIER_TYPE.key,
+                "one,http://www.geoserver.org/one;two,http://www.geoserver.org/two");
+        getGeoServer().save(wcs);
+
+        tester.startPage(new FormTestPage(new ComponentBuilder() {
+
+            @Override
+            public Component buildComponent(String id) {
+                return new InspireAdminPanel(id, new Model(wcs));
             }
         }));
 
@@ -108,7 +129,31 @@ public class InspirePanelTest extends GeoServerWicketTestSupport {
         UniqueResourceIdentifiers expected = Converters.convert("one,http://www.geoserver.org/one;two,http://www.geoserver.org/two,http://metadata.geoserver.org/id?two", UniqueResourceIdentifiers.class);
         tester.assertModelValue("form:panel:datasetIdentifiersContainer:spatialDatasetIdentifiers", expected);
     }
-    
+
+    @Test
+    public void testWCSContents() {
+        setupWCSPopulatedPage();
+
+        tester.assertComponent("form", Form.class);
+
+        // check language
+        tester.assertComponent("form:panel:language", LanguageDropDownChoice.class);
+        tester.assertModelValue("form:panel:language", "fre");
+
+        // check metadata url
+        tester.assertComponent("form:panel:metadataURL", TextField.class);
+        tester.assertModelValue("form:panel:metadataURL", "http://foo.com?bar=baz");
+
+        // check metadata url type
+        tester.assertComponent("form:panel:metadataURLType", DropDownChoice.class);
+        tester.assertModelValue("form:panel:metadataURLType", "application/vnd.iso.19139+xml");
+
+        // the spatial identifiers editor
+        tester.assertComponent("form:panel:datasetIdentifiersContainer:spatialDatasetIdentifiers", UniqueResourceIdentifiersEditor.class);
+        UniqueResourceIdentifiers expected = Converters.convert("one,http://www.geoserver.org/one;two,http://www.geoserver.org/two", UniqueResourceIdentifiers.class);
+        tester.assertModelValue("form:panel:datasetIdentifiersContainer:spatialDatasetIdentifiers", expected);
+    }
+
     @Test
     public void testEditBasic() {
         setupWFSPopulatedPage();
